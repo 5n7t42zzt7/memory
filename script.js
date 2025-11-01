@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
             firstCard.classList.remove('flipped');
             secondCard.classList.remove('flipped');
             resetBoard();
-        }, 1200); // Wait 1.2 seconds before flipping back
+        }, 2200); // Wait 1.2 seconds before flipping back
     }
 
     // Reset turn variables
