@@ -1,5 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // --- Define variables in the global scope ---
+    const startButton = document.getElementById('startButton');
+    const gameBoard = document.querySelector('.game-board');
+    const fireworksContainer = document.getElementById('fireworks-container');
+    
+    let cardPairs = [];
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false; 
+    let matchedPairs = 0; 
+    let totalPairs = 0; 
+
     // --- STEP 1: DEFINE YOUR WORDS ---
     const wordsData = [
         { id: 1, word: 'כֶּלֶב', image: 'images/dog.png', audio: 'audio/dog.m4a' },
@@ -10,83 +22,82 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     // ---------------------------------
 
-    // --- NEW: Play startup sound ---
-    try {
-        // Make sure "comeandplay.m4a" is in your /audio folder
-        const startAudio = new Audio('audio/comeandplay.m4a');
-        startAudio.play();
-    } catch (e) {
-        console.error("Could not play startup audio:", e);
-    }
-    // --- End of new code ---
-
-    const gameBoard = document.querySelector('.game-board');
-    const fireworksContainer = document.getElementById('fireworks-container'); 
-    let cardPairs = [];
-    let firstCard = null;
-    let secondCard = null;
-    let lockBoard = false; 
-    let matchedPairs = 0; 
-    const totalPairs = wordsData.length; 
-
-    // --- Function to trigger fireworks ---
-    function showFireworks() {
-        fireworksContainer.classList.add('show');
-        setTimeout(() => {
-            fireworksContainer.classList.remove('show');
-        }, 1000); 
-    }
-
-    // Create card pairs
-    wordsData.forEach(item => {
-        cardPairs.push({
-            type: 'word',
-            id: item.id,
-            content: item.word,
-            audio: item.audio
-        });
-        cardPairs.push({
-            type: 'image',
-            id: item.id,
-            content: item.image,
-            audio: item.audio
-        });
-    });
-
-    // Shuffle the cards
-    cardPairs.sort(() => 0.5 - Math.random());
-
-    // Create and display cards
-    cardPairs.forEach(pair => {
-        const card = document.createElement('div');
-        card.classList.add('card');
-        card.dataset.id = pair.id;
-        card.dataset.audio = pair.audio;
-
-        const cardBack = document.createElement('div');
-        cardBack.classList.add('card-face', 'card-back');
-        cardBack.textContent = '❓';
-
-        const cardFront = document.createElement('div');
-        cardFront.classList.add('card-face', 'card-front');
-
-        if (pair.type === 'image') {
-            const img = document.createElement('img');
-            img.src = pair.content;
-            cardFront.appendChild(img);
-        } else {
-            cardFront.classList.add('word-card');
-            cardFront.textContent = pair.content;
+    // --- Main "Start Game" logic ---
+    startButton.addEventListener('click', () => {
+        // 1. Play the startup sound (now allowed!)
+        try {
+            const startAudio = new Audio('audio/comeandplay.m4a');
+            startAudio.play();
+        } catch (e) {
+            console.error("Could not play startup audio:", e);
         }
 
-        card.appendChild(cardBack);
-        card.appendChild(cardFront);
+        // 2. Hide the button
+        startButton.style.display = 'none';
 
-        card.addEventListener('click', () => flipCard(card));
-        gameBoard.appendChild(card);
+        // 3. Show the game board
+        gameBoard.classList.add('active');
+
+        // 4. Run the rest of the game setup
+        initializeGame();
     });
 
-    // Flip card function
+    // --- All game logic is now inside this function ---
+    function initializeGame() {
+        totalPairs = wordsData.length; // Set total pairs
+
+        // Create card pairs
+        wordsData.forEach(item => {
+            cardPairs.push({
+                type: 'word',
+                id: item.id,
+                content: item.word,
+                audio: item.audio
+            });
+            cardPairs.push({
+                type: 'image',
+                id: item.id,
+                content: item.image,
+                audio: item.audio
+            });
+        });
+
+        // Shuffle the cards
+        cardPairs.sort(() => 0.5 - Math.random());
+
+        // Create and display cards
+        cardPairs.forEach(pair => {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.id = pair.id;
+            card.dataset.audio = pair.audio;
+
+            const cardBack = document.createElement('div');
+            cardBack.classList.add('card-face', 'card-back');
+            cardBack.textContent = '❓';
+
+            const cardFront = document.createElement('div');
+            cardFront.classList.add('card-face', 'card-front');
+
+            if (pair.type === 'image') {
+                const img = document.createElement('img');
+                img.src = pair.content;
+                cardFront.appendChild(img);
+            } else {
+                cardFront.classList.add('word-card');
+                cardFront.textContent = pair.content;
+            }
+
+            card.appendChild(cardBack);
+            card.appendChild(cardFront);
+
+            card.addEventListener('click', () => flipCard(card));
+            gameBoard.appendChild(card);
+        });
+    }
+
+    // --- All other functions remain the same ---
+
     function flipCard(card) {
         if (lockBoard || card === firstCard || card.classList.contains('matched')) {
             return;
@@ -107,13 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
         checkForMatch();
     }
 
-    // Check for match
     function checkForMatch() {
         const isMatch = firstCard.dataset.id === secondCard.dataset.id;
         isMatch ? disableCards() : unflipCards();
     }
 
-    // It's a match!
     function disableCards() {
         matchedPairs++; 
         setTimeout(() => {
@@ -139,17 +148,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1200); 
     }
 
-    // Not a match
     function unflipCards() {
         setTimeout(() => {
             firstCard.classList.remove('flipped');
             secondCard.classList.remove('flipped');
             resetBoard();
-        }, 2200); // 2.2-second delay for wrong pairs
+        }, 2200); 
     }
 
-    // Reset turn
     function resetBoard() {
         [firstCard, secondCard, lockBoard] = [null, null, false];
     }
+
+    function showFireworks() {
+        fireworksContainer.classList.add('show');
+        setTimeout(() => {
+            fireworksContainer.classList.remove('show');
+        }, 1000); 
+    }
+
 });

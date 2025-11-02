@@ -158,3 +158,32 @@ h1 {
         font-size: 100px; /* Smaller fireworks */
     }
 }
+
+/* --- NEW STYLES FOR START BUTTON --- */
+
+#startButton {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 15px 30px;
+    border-radius: 10px;
+    border: none;
+    background-color: #4a90e2;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#startButton:hover {
+    background-color: #357abd;
+}
+
+/* Hide the game board by default */
+.game-board {
+    display: none; 
+    /* ... (rest of the styles are already there) ... */
+}
+
+/* We will add this class with JavaScript to show the board */
+.game-board.active {
+    display: grid; 
+}
